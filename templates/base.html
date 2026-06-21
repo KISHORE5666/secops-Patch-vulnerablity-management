@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecOps Platform - {% block title %}{% endblock %}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #1a1a2e;
+            min-height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .brand {
+            padding: 20px 18px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #4fc3f7;
+            border-bottom: 1px solid #2a2a4e;
+        }
+        .sidebar .brand span { font-size: 11px; color: #888; display: block; margin-top: 3px; }
+        .sidebar nav { padding: 15px 0; flex: 1; }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 18px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active { background: #2a2a4e; color: white; border-left: 3px solid #4fc3f7; }
+        .sidebar nav .section-label {
+            padding: 12px 18px 5px;
+            font-size: 10px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .sidebar .user-block {
+            padding: 15px 18px;
+            border-top: 1px solid #2a2a4e;
+            font-size: 12px;
+            color: #888;
+        }
+        .sidebar .user-block strong { color: #ccc; display: block; margin-bottom: 3px; }
+        .sidebar .user-block a { color: #ef9a9a; text-decoration: none; font-size: 12px; }
+
+        /* Main content */
+        .main { margin-left: 220px; flex: 1; padding: 25px; }
+
+        /* Topbar */
+        .topbar {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .topbar h1 { font-size: 18px; color: #1a1a2e; }
+        .topbar .breadcrumb { font-size: 12px; color: #888; }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary   { background: #1565c0; color: white; }
+        .btn-danger    { background: #c62828; color: white; }
+        .btn-secondary { background: #546e7a; color: white; }
+        .btn-success   { background: #2e7d32; color: white; }
+        .btn-warning   { background: #e65100; color: white; }
+        .btn:hover { opacity: 0.85; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 13px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f5f5f5; font-weight: 600; font-size: 12px; color: #555; }
+        tr:hover { background: #fafafa; }
+
+        /* Severity badges */
+        .badge {
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge-critical { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+        .badge-high     { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+        .badge-medium   { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+        .badge-low      { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .badge-open        { background: #ffebee; color: #c62828; }
+        .badge-in_progress { background: #fff3e0; color: #e65100; }
+        .badge-resolved    { background: #e8f5e9; color: #2e7d32; }
+        .badge-super_admin    { background: #e53935; color: white; }
+        .badge-security_admin { background: #1565c0; color: white; }
+        .badge-analyst        { background: #2e7d32; color: white; }
+
+        .alert {
+            padding: 11px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+        .alert-danger  { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #444; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 11px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #1565c0;
+        }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .filter-bar input, .filter-bar select {
+            padding: 7px 11px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        h2 { font-size: 17px; color: #1a1a2e; margin-bottom: 15px; }
+        h3 { font-size: 14px; color: #444; margin-bottom: 10px; }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            border-top: 4px solid #ddd;
+        }
+        .stat-card .num  { font-size: 32px; font-weight: bold; }
+        .stat-card .lbl  { font-size: 12px; color: #888; margin-top: 4px; }
+        .detail-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start; }
+        .detail-row .lbl { font-size: 12px; color: #888; min-width: 140px; font-weight: 600; }
+        .detail-row .val { font-size: 13px; color: #333; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">🛡 SecOps Platform <span>Security Operations</span></div>
+        <nav>
+            <div class="section-label">Main</div>
+            <a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+
+            <div class="section-label">Assets</div>
+            <a href="{{ url_for('assets_list') }}" {% if 'asset' in request.endpoint %}class="active"{% endif %}>🖥 Asset Inventory</a>
+
+            <div class="section-label">Patches</div>
+            <a href="{{ url_for('patch_dashboard') }}" {% if 'patch_dashboard' in request.endpoint %}class="active"{% endif %}>📋 Patch Dashboard</a>
+            <a href="{{ url_for('patch_list') }}" {% if request.endpoint in ['patch_list','patch_view','patch_add'] %}class="active"{% endif %}>🔧 Patch Repository</a>
+            <a href="{{ url_for('patch_report') }}" {% if 'patch_report' in request.endpoint %}class="active"{% endif %}>📄 Patch Reports</a>
+
+            <div class="section-label">Vulnerabilities</div>
+            <a href="{{ url_for('vuln_list') }}"  {% if request.endpoint in ['vuln_list','vuln_view','vuln_add','vuln_edit'] %}class="active"{% endif %}>🔍 Vulnerabilities</a>
+            <a href="{{ url_for('scans_list') }}" {% if 'scan' in request.endpoint %}class="active"{% endif %}>📡 Scan Records</a>
+        </nav>
+        <div class="user-block">
+            <strong>{{ current_user.username }}</strong>
+            <span class="badge badge-{{ current_user.role }}" style="margin-bottom:8px; display:inline-block;">{{ current_user.role }}</span><br>
+            <a href="{{ url_for('logout') }}">⬡ Logout</a>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

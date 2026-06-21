@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Add Patch{% endblock %}
+{% block content %}
+<div class="topbar"><h1>Add Patch</h1><a href="{{ url_for('patch_list') }}" class="btn btn-secondary">← Back</a></div>
+<div class="card" style="max-width:650px;">
+    <form method="POST">
+        <div class="form-grid-2">
+            <div class="form-group"><label>Patch Name *</label><input type="text" name="patch_name" placeholder="e.g. Windows Security Update KB5034441" required></div>
+            <div class="form-group"><label>Version *</label><input type="text" name="patch_version" placeholder="e.g. 1.0.0" required></div>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group"><label>Vendor</label><input type="text" name="vendor" placeholder="e.g. Microsoft"></div>
+            <div class="form-group"><label>Release Date</label><input type="date" name="release_date"></div>
+        </div>
+        <div class="form-group">
+            <label>Severity</label>
+            <select name="severity">
+                {% for s in ['critical','high','medium','low'] %}<option value="{{ s }}">{{ s|capitalize }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-group"><label>Description</label><textarea name="description" rows="3" placeholder="What does this patch fix?"></textarea></div>
+        <button type="submit" class="btn btn-primary">Add Patch</button>
+        <a href="{{ url_for('patch_list') }}" class="btn btn-secondary" style="margin-left:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

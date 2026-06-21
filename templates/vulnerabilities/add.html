@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Add Vulnerability{% endblock %}
+{% block content %}
+
+<div class="topbar">
+    <h1>Add Vulnerability</h1>
+    <a href="{{ url_for('vuln_list') }}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="card" style="max-width:760px;">
+    <form method="POST" id="vulnForm">
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>CVE ID *</label>
+                <input type="text" name="cve_id" placeholder="e.g. CVE-2024-1234" required>
+            </div>
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" name="title" placeholder="Short vulnerability title" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Description *</label>
+            <textarea name="description" rows="3" placeholder="Describe the vulnerability..." required></textarea>
+        </div>
+
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label>CVSS Score (0–10)</label>
+                <input type="number" name="cvss_score" id="cvssInput" step="0.1" min="0" max="10"
+                       placeholder="e.g. 9.8" oninput="autoClassify(this.value)">
+            </div>
+            <div class="form-group">
+                <label>Severity</label>
+                <select name="severity" id="severitySelect">
+                    <option value="auto">Auto (from CVSS)</option>
+                    {% for s in ['critical','high','medium','low','informational'] %}
+                    <option value="{{ s }}">{{ s|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Predicted Severity</label>
+                <div id="severityPreview" style="padding:8px 12px; border-radius:5px; font-size:13px; font-weight:bold; background:#f5f5f5; color:#888; margin-top:2px;">
+                    Enter CVSS score
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="open">Open</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Discovered Date</label>
+                <input type="date" name="discovered_date">
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Affected Asset (name)</label>
+                <input type="text" name="affected_asset" placeholder="e.g. Web Server 01">
+            </div>
+            <div class="form-group">
+                <label>Link to Asset Record</label>
+                <select name="asset_id">
+                    <option value="">-- None --</option>
+                    {% for a in assets %}
+                    <option value="{{ a.id }}">{{ a.asset_name }} ({{ a.ip_address }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Remediation Plan</label>
+            <textarea name="remediation_plan" rows="3" placeholder="Steps to fix this vulnerability..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Vulnerability</button>
+        <a href="{{ url_for('vuln_list') }}" class="btn btn-secondary" style="margin-left:8px;">Cancel</a>
+    </form>
+</div>
+
+<script>
+const severityConfig = {
+    critical:      { bg: '#ffebee', color: '#b71c1c' },
+    high:          { bg: '#fff3e0', color: '#e65100' },
+    medium:        { bg: '#fff8e1', color: '#f57f17' },
+    low:           { bg: '#e8f5e9', color: '#2e7d32' },
+    informational: { bg: '#e3f2fd', color: '#1565c0' }
+};
+
+function autoClassify(cvss) {
+    let severity = 'informational';
+    if (cvss >= 9.0)      severity = 'critical';
+    else if (cvss >= 7.0) severity = 'high';
+    else if (cvss >= 4.0) severity = 'medium';
+    else if (cvss > 0)    severity = 'low';
+
+    const preview = document.getElementById('severityPreview');
+    const cfg = severityConfig[severity];
+    preview.style.background = cfg.bg;
+    preview.style.color = cfg.color;
+    preview.textContent = severity.toUpperCase();
+
+    const sel = document.getElementById('severitySelect');
+    if (sel.value === 'auto') {
+        // visual only, actual classification happens server-side
+    }
+}
+</script>
+{% endblock %}

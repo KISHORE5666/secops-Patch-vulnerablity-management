@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Assets{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h2>Asset Inventory</h2>
+    {% if current_user.role in ['super_admin', 'security_admin'] %}
+        <a href="{{ url_for('assets_add') }}" class="btn btn-primary">+ Add Asset</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    {% if assets %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Asset Name</th>
+                <th>IP Address</th>
+                <th>Operating System</th>
+                <th>Owner</th>
+                <th>Type</th>
+                <th>Added On</th>
+                {% if current_user.role in ['super_admin', 'security_admin'] %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td>{{ asset.id }}</td>
+                <td><strong>{{ asset.asset_name }}</strong></td>
+                <td>{{ asset.ip_address }}</td>
+                <td>{{ asset.operating_system }}</td>
+                <td>{{ asset.owner }}</td>
+                <td>{{ asset.asset_type }}</td>
+                <td>{{ asset.created_at.strftime('%Y-%m-%d') }}</td>
+                {% if current_user.role in ['super_admin', 'security_admin'] %}
+                <td>
+                    <a href="{{ url_for('assets_edit', id=asset.id) }}" class="btn btn-secondary">Edit</a>
+                    {% if current_user.role == 'super_admin' %}
+                    <form method="POST" action="{{ url_for('assets_delete', id=asset.id) }}"
+                          style="display:inline;"
+                          onsubmit="return confirm('Delete this asset?')">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="color:#888; text-align:center; padding: 30px 0;">No assets found. Add your first asset.</p>
+    {% endif %}
+</div>
+{% endblock %}

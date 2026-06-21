@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Patch Repository{% endblock %}
+{% block content %}
+<div class="topbar">
+    <h1>Patch Repository</h1>
+    {% if current_user.role in ['super_admin','security_admin'] %}
+    <a href="{{ url_for('patch_add') }}" class="btn btn-primary">+ Add Patch</a>
+    {% endif %}
+</div>
+<div class="card">
+{% if patches %}
+<table>
+    <thead><tr><th>ID</th><th>Patch Name</th><th>Version</th><th>Vendor</th><th>Severity</th><th>Release Date</th><th>Assigned To</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for p in patches %}
+    <tr>
+        <td>{{ p.id }}</td>
+        <td><strong>{{ p.patch_name }}</strong></td>
+        <td>{{ p.patch_version }}</td>
+        <td>{{ p.vendor or '-' }}</td>
+        <td><span class="badge badge-{{ p.severity }}">{{ p.severity }}</span></td>
+        <td>{{ p.release_date or '-' }}</td>
+        <td>{{ p.assignments|length }} asset(s)</td>
+        <td>
+            <a href="{{ url_for('patch_view', id=p.id) }}" class="btn btn-secondary btn-sm">View</a>
+            {% if current_user.role == 'super_admin' %}
+            <form method="POST" action="{{ url_for('patch_delete', id=p.id) }}" style="display:inline;" onsubmit="return confirm('Delete?')">
+                <button class="btn btn-danger btn-sm">Del</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="color:#888;text-align:center;padding:30px;">No patches yet.</p>
+{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Add Scan Record{% endblock %}
+{% block content %}
+
+<div class="topbar">
+    <h1>Add Scan Record</h1>
+    <a href="{{ url_for('scans_list') }}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="card" style="max-width:500px;">
+    <form method="POST">
+        <div class="form-group">
+            <label>Scan Name *</label>
+            <input type="text" name="scan_name" placeholder="e.g. Q2 2026 Internal Scan" required>
+        </div>
+        <div class="form-group">
+            <label>Scanner Type *</label>
+            <select name="scanner_type" required>
+                <option value="">Select</option>
+                <option value="nessus">Nessus</option>
+                <option value="qualys">Qualys</option>
+                <option value="openvas">OpenVAS</option>
+                <option value="internal">Internal</option>
+                <option value="manual">Manual</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Total Findings</label>
+            <input type="number" name="findings_count" min="0" value="0">
+        </div>
+        <button type="submit" class="btn btn-primary">Add Scan</button>
+        <a href="{{ url_for('scans_list') }}" class="btn btn-secondary" style="margin-left:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

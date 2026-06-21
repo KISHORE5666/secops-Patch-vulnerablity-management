@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}{{ vuln.cve_id }}{% endblock %}
+{% block content %}
+
+<div class="topbar">
+    <h1>{{ vuln.cve_id }} — {{ vuln.title }}</h1>
+    <div style="display:flex; gap:8px;">
+        {% if current_user.role in ['super_admin','security_admin'] %}
+        <a href="{{ url_for('vuln_edit', id=vuln.id) }}" class="btn btn-warning">Edit</a>
+        {% endif %}
+        <a href="{{ url_for('vuln_list') }}" class="btn btn-secondary">← Back</a>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+    <!-- Left Column -->
+    <div>
+        <div class="card">
+            <h2>Vulnerability Details</h2>
+            <div class="detail-row"><span class="lbl">CVE ID</span><span class="val"><strong>{{ vuln.cve_id }}</strong></span></div>
+            <div class="detail-row"><span class="lbl">Title</span><span class="val">{{ vuln.title }}</span></div>
+            <div class="detail-row">
+                <span class="lbl">Severity</span>
+                <span class="val">
+                    {% set sc = severity_config.get(vuln.severity, {}) %}
+                    <span style="background:{{ sc.bg }}; color:{{ sc.color }}; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:bold; text-transform:uppercase;">
+                        {{ vuln.severity }}
+                    </span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="lbl">CVSS Score</span>
+                <span class="val">
+                    <strong style="font-size:18px;">{{ vuln.cvss_score or 'N/A' }}</strong>
+                    {% if vuln.cvss_score %}<span style="color:#888; font-size:12px;">/10</span>{% endif %}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="lbl">Risk Score</span>
+                <span class="val"><strong style="font-size:18px; color:#e65100;">{{ risk_score }}</strong><span style="color:#888; font-size:12px;">/10</span></span>
+            </div>
+            <div class="detail-row">
+                <span class="lbl">Status</span>
+                <span class="val"><span class="badge badge-{{ vuln.status }}">{{ vuln.status|replace('_',' ') }}</span></span>
+            </div>
+            <div class="detail-row"><span class="lbl">Affected Asset</span><span class="val">{{ vuln.affected_asset or 'N/A' }}</span></div>
+            <div class="detail-row"><span class="lbl">Discovered</span><span class="val">{{ vuln.discovered_date or 'N/A' }}</span></div>
+            <div class="detail-row"><span class="lbl">Added On</span><span class="val">{{ vuln.created_at.strftime('%Y-%m-%d %H:%M') }}</span></div>
+            <div class="detail-row"><span class="lbl">Last Updated</span><span class="val">{{ vuln.updated_at.strftime('%Y-%m-%d %H:%M') }}</span></div>
+        </div>
+
+        {% if vuln.asset %}
+        <div class="card">
+            <h2>Linked Asset</h2>
+            <div class="detail-row"><span class="lbl">Name</span><span class="val">{{ vuln.asset.asset_name }}</span></div>
+            <div class="detail-row"><span class="lbl">IP Address</span><span class="val">{{ vuln.asset.ip_address }}</span></div>
+            <div class="detail-row"><span class="lbl">OS</span><span class="val">{{ vuln.asset.operating_system }}</span></div>
+            <div class="detail-row"><span class="lbl">Owner</span><span class="val">{{ vuln.asset.owner }}</span></div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        <div class="card">
+            <h2>Description</h2>
+            <p style="font-size:13px; line-height:1.7; color:#444;">{{ vuln.description }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Remediation Plan</h2>
+            {% if vuln.remediation_plan %}
+            <p style="font-size:13px; line-height:1.7; color:#444;">{{ vuln.remediation_plan }}</p>
+            {% else %}
+            <p style="color:#aaa; font-size:13px;">No remediation plan documented.</p>
+            {% endif %}
+        </div>
+
+        <!-- Remediation Status Update -->
+        {% if current_user.role in ['super_admin','security_admin'] %}
+        <div class="card">
+            <h2>Update Remediation Status</h2>
+            <form method="POST" action="{{ url_for('vuln_remediate', id=vuln.id) }}">
+                <div class="form-group">
+                    <label>New Status</label>
+                    <select name="status">
+                        {% for st in ['open','in_progress','resolved'] %}
+                        <option value="{{ st }}" {% if vuln.status == st %}selected{% endif %}>{{ st|replace('_',' ')|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Note (optional)</label>
+                    <textarea name="note" rows="2" placeholder="Describe what action was taken..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Update Status</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Remediation History -->
+        <div class="card">
+            <h2>Remediation History</h2>
+            {% if history %}
+            <table>
+                <thead><tr><th>Date</th><th>Change</th><th>Note</th><th>By</th></tr></thead>
+                <tbody>
+                {% for h in history %}
+                <tr>
+                    <td style="white-space:nowrap;">{{ h.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td><span style="font-size:12px; color:#1565c0;">{{ h.status_change or '-' }}</span></td>
+                    <td style="font-size:12px;">{{ h.action }}</td>
+                    <td>{{ h.performed_by }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color:#aaa; font-size:13px;">No history yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ patch.patch_name }}{% endblock %}
+{% block content %}
+<div class="topbar">
+    <h1>{{ patch.patch_name }}</h1>
+    <a href="{{ url_for('patch_list') }}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+<div>
+    <div class="card">
+        <h2>Patch Details</h2>
+        <div class="detail-row"><span class="lbl">Name</span><span class="val"><strong>{{ patch.patch_name }}</strong></span></div>
+        <div class="detail-row"><span class="lbl">Version</span><span class="val">{{ patch.patch_version }}</span></div>
+        <div class="detail-row"><span class="lbl">Vendor</span><span class="val">{{ patch.vendor or 'N/A' }}</span></div>
+        <div class="detail-row"><span class="lbl">Release Date</span><span class="val">{{ patch.release_date or 'N/A' }}</span></div>
+        <div class="detail-row"><span class="lbl">Severity</span><span class="val"><span class="badge badge-{{ patch.severity }}">{{ patch.severity }}</span></span></div>
+        <div class="detail-row"><span class="lbl">Description</span><span class="val">{{ patch.description or 'N/A' }}</span></div>
+    </div>
+
+    {% if current_user.role in ['super_admin','security_admin'] %}
+    <div class="card">
+        <h2>Assign to Assets</h2>
+        <form method="POST" action="{{ url_for('patch_assign', patch_id=patch.id) }}">
+            <div class="form-group">
+                <label>Select Assets (hold Ctrl for multiple)</label>
+                <select name="asset_ids" multiple style="height:120px;">
+                    {% for a in assets %}<option value="{{ a.id }}">{{ a.asset_name }} — {{ a.ip_address }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group"><label>Schedule Date/Time (optional)</label><input type="datetime-local" name="scheduled_at"></div>
+            <button type="submit" class="btn btn-primary">Assign Patch</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Deployment Status</h2>
+    {% if assignments %}
+    <table>
+        <thead><tr><th>Asset</th><th>Status</th><th>Scheduled</th><th>Deployed</th><th>Update</th></tr></thead>
+        <tbody>
+        {% for a in assignments %}
+        <tr>
+            <td><strong>{{ a.asset.asset_name }}</strong><br><span style="font-size:11px;color:#888;">{{ a.asset.ip_address }}</span></td>
+            <td>
+                {% set sc = {'pending':'#888','scheduled':'#1565c0','in_progress':'#f57f17','successful':'#2e7d32','failed':'#c62828','rolled_back':'#6a1b9a'} %}
+                <span style="color:{{ sc.get(a.status,'#333') }};font-weight:bold;font-size:12px;text-transform:uppercase;">{{ a.status|replace('_',' ') }}</span>
+            </td>
+            <td style="font-size:12px;">{{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') if a.scheduled_at else '-' }}</td>
+            <td style="font-size:12px;">{{ a.deployed_at.strftime('%Y-%m-%d %H:%M') if a.deployed_at else '-' }}</td>
+            <td>
+                {% if current_user.role in ['super_admin','security_admin'] %}
+                <form method="POST" action="{{ url_for('patch_status_update', assignment_id=a.id) }}">
+                    <select name="status" style="font-size:12px;padding:3px;">
+                        {% for s in ['pending','scheduled','in_progress','successful','failed','rolled_back'] %}
+                        <option value="{{ s }}" {% if a.status==s %}selected{% endif %}>{{ s|replace('_',' ') }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="notes" placeholder="Note" style="font-size:12px;padding:3px;width:100px;">
+                    <button class="btn btn-success btn-sm">✓</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color:#888;text-align:center;padding:20px;">No assets assigned yet.</p>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

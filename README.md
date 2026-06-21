@@ -6,7 +6,7 @@
 
 A centralized **Security Operations (SecOps) Platform** built with Python and Flask. This platform empowers security teams to gain deep visibility into their IT infrastructure's security posture by streamlining asset management, vulnerability tracking, and patch deployment.
 
-##  Features
+## 🚀 Features
 
 * **Centralized Asset Management:** Maintain a detailed inventory of IT assets (servers, databases, workstations, containers) across the organization.
 * **Intelligent Vulnerability Tracking:** 
@@ -18,7 +18,7 @@ A centralized **Security Operations (SecOps) Platform** built with Python and Fl
 * **Analytics & Dashboards:** Visual overviews of security health, featuring 6-month vulnerability trends, patch compliance rates, and critical open issues.
 * **Role-Based Access Control (RBAC):** Secure access using Flask-Login with distinct roles (`super_admin`, `security_admin`, `analyst`).
 
-##  Tech Stack
+## 💻 Tech Stack
 
 * **Backend:** Python, Flask
 * **Database:** SQLAlchemy (ORM)
@@ -77,7 +77,7 @@ When the database is initialized, the following default users are created for te
 
 *Please ensure you change these credentials in a production environment.*
 
-## Contributing
+## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
 
 ## 📝 License

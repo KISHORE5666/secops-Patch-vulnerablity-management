@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Edit Vulnerability{% endblock %}
+{% block content %}
+
+<div class="topbar">
+    <h1>Edit — {{ vuln.cve_id }}</h1>
+    <a href="{{ url_for('vuln_view', id=vuln.id) }}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="card" style="max-width:760px;">
+    <form method="POST">
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>CVE ID *</label>
+                <input type="text" name="cve_id" value="{{ vuln.cve_id }}" required>
+            </div>
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" name="title" value="{{ vuln.title }}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Description *</label>
+            <textarea name="description" rows="3" required>{{ vuln.description }}</textarea>
+        </div>
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label>CVSS Score</label>
+                <input type="number" name="cvss_score" step="0.1" min="0" max="10" value="{{ vuln.cvss_score or '' }}">
+            </div>
+            <div class="form-group">
+                <label>Severity *</label>
+                <select name="severity" required>
+                    {% for s in ['critical','high','medium','low','informational'] %}
+                    <option value="{{ s }}" {% if vuln.severity == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    {% for st in ['open','in_progress','resolved'] %}
+                    <option value="{{ st }}" {% if vuln.status == st %}selected{% endif %}>{{ st|replace('_',' ')|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Affected Asset</label>
+                <input type="text" name="affected_asset" value="{{ vuln.affected_asset or '' }}">
+            </div>
+            <div class="form-group">
+                <label>Discovered Date</label>
+                <input type="date" name="discovered_date" value="{{ vuln.discovered_date or '' }}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Link to Asset</label>
+            <select name="asset_id">
+                <option value="">-- None --</option>
+                {% for a in assets %}
+                <option value="{{ a.id }}" {% if vuln.asset_id == a.id %}selected{% endif %}>{{ a.asset_name }} ({{ a.ip_address }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Remediation Plan</label>
+            <textarea name="remediation_plan" rows="3">{{ vuln.remediation_plan or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ url_for('vuln_view', id=vuln.id) }}" class="btn btn-secondary" style="margin-left:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

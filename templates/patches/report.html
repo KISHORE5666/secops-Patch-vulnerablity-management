@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Patch Reports{% endblock %}
+{% block content %}
+<div class="topbar"><h1>Patch Reports</h1></div>
+
+<div class="card" style="padding:15px;margin-bottom:15px;">
+    <div class="filter-bar">
+        <a href="{{ url_for('patch_report', type='all') }}"        class="btn {% if report_type=='all' %}btn-primary{% else %}btn-secondary{% endif %}">All Deployments</a>
+        <a href="{{ url_for('patch_report', type='successful') }}" class="btn {% if report_type=='successful' %}btn-primary{% else %}btn-secondary{% endif %}">Successful</a>
+        <a href="{{ url_for('patch_report', type='failed') }}"     class="btn {% if report_type=='failed' %}btn-primary{% else %}btn-secondary{% endif %}">Failed</a>
+        <a href="{{ url_for('patch_report', type='missing') }}"    class="btn {% if report_type=='missing' %}btn-primary{% else %}btn-secondary{% endif %}">Missing Patches</a>
+    </div>
+</div>
+
+<div class="card">
+    {% if report_type == 'missing' %}
+        <h2>Assets with No Successful Patch Deployments</h2>
+        {% if assets %}
+        <table>
+            <thead><tr><th>Asset Name</th><th>IP Address</th><th>OS</th><th>Owner</th></tr></thead>
+            <tbody>
+            {% for a in assets %}<tr><td>{{ a.asset_name }}</td><td>{{ a.ip_address }}</td><td>{{ a.operating_system }}</td><td>{{ a.owner }}</td></tr>{% endfor %}
+            </tbody>
+        </table>
+        {% else %}<p style="color:#2e7d32;text-align:center;padding:20px;">All assets have at least one successful patch deployment.</p>{% endif %}
+    {% else %}
+        <h2>{{ report_type|capitalize }} Deployments</h2>
+        {% if assignments %}
+        <table>
+            <thead><tr><th>Patch</th><th>Version</th><th>Asset</th><th>Status</th><th>Scheduled</th><th>Deployed</th><th>Notes</th></tr></thead>
+            <tbody>
+            {% for a in assignments %}
+            <tr>
+                <td><strong>{{ a.patch.patch_name[:35] }}</strong></td>
+                <td>{{ a.patch.patch_version }}</td>
+                <td>{{ a.asset.asset_name }}</td>
+                <td>
+                    {% set sc = {'pending':'#888','scheduled':'#1565c0','in_progress':'#f57f17','successful':'#2e7d32','failed':'#c62828','rolled_back':'#6a1b9a'} %}
+                    <span style="color:{{ sc.get(a.status,'#333') }};font-weight:bold;font-size:12px;text-transform:uppercase;">{{ a.status|replace('_',' ') }}</span>
+                </td>
+                <td style="font-size:12px;">{{ a.scheduled_at.strftime('%Y-%m-%d') if a.scheduled_at else '-' }}</td>
+                <td style="font-size:12px;">{{ a.deployed_at.strftime('%Y-%m-%d') if a.deployed_at else '-' }}</td>
+                <td style="font-size:12px;">{{ a.notes or '-' }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}<p style="color:#888;text-align:center;padding:20px;">No records found.</p>{% endif %}
+    {% endif %}
+</div>
+{% endblock %}
